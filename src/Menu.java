@@ -1,7 +1,4 @@
-import model.usuario.Aluno;
-import model.usuario.Bibliotecario;
-import model.usuario.Professor;
-import model.usuario.Usuario;
+import model.usuario.*;
 
 import java.util.Scanner;
 
@@ -76,19 +73,23 @@ public class Menu {
 
             switch (opcao) {
                 case 1:
-                    System.out.print("Digite o título ou ID da obra: ");
-                    String consulta = input.nextLine();
-                    sistema.consultarObra(consulta);
+                    sistema.consultarObra();
                     break;
                 case 2:
                     // Caso o user logado seja do tipo Aluno ou Professor
-                    if (sistema.getUsuarioLogado() instanceof Aluno || sistema.getUsuarioLogado() instanceof Professor) {
+                    if (sistema.getUsuarioLogado() instanceof UsuarioAcademico usuarioAcademico) {
+
+                        if (usuarioAcademico.isBloqueado()){
+                            System.out.println("O seu limite de empréstimos foi excedido! Empréstimos ativos: " + usuarioAcademico.getQuantidadeEmprestimosAtivos());
+                            return;
+                        }
+                        sistema.consultarObra();
+
                         System.out.print("Digite o ID da obra para empréstimo: ");
                         int idObra = input.nextInt();
                         input.nextLine();
                         sistema.emprestarObra(idObra);
-
-                        // Caso o user logado seja do tipo Bibliotecario
+                    // Caso o user logado seja do tipo Bibliotecario
                     } else if (sistema.getUsuarioLogado() instanceof Bibliotecario) {
                         System.out.println("\n--CADASTRO DE USUÁRIO");
                         System.out.print("Informe o nome: ");

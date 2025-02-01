@@ -5,7 +5,7 @@ public abstract class Usuario {
     protected String nome;
     protected String email;
     protected String senha;
-    protected boolean bloqueado;
+
 
     public static final String[] NIVEIS_ACESSO = {"Aluno", "Professor", "Bibliotecario"};
 
@@ -17,7 +17,6 @@ public abstract class Usuario {
         this.nome = nome;
         this.email = email;
         this.senha = senha;
-        this.bloqueado = false;
     }
 
     public String getNivelAcesso() {
@@ -44,14 +43,6 @@ public abstract class Usuario {
         System.out.println("Logout realizado com sucesso.");
     }
 
-    public boolean isBloqueado() {
-        return bloqueado;
-    }
-
-    public void desbloquear() {
-        this.bloqueado = false;
-    }
-
 
     @Override
     public String toString() {
@@ -60,7 +51,6 @@ public abstract class Usuario {
                 ", nome='" + nome + '\'' +
                 ", email='" + email + '\'' +
                 ", senha='" + senha + '\'' +
-                ", bloqueado=" + bloqueado +
                 '}';
     }
 }

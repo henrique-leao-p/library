@@ -1,14 +1,12 @@
 package model.usuario;
 
-public class Professor extends Usuario {
+public class Professor extends UsuarioAcademico {
     private String departamento;
-    private int limiteEmprestimos;
 
 
     public Professor(String nivelAcesso, String nome, String email, String senha, String departamento) {
-        super(nivelAcesso, nome, email, senha);
+        super(nivelAcesso, nome, email, senha, 10);
         this.departamento = departamento;
-        this.limiteEmprestimos = 10;
     }
 
     public String getDepartamento() {

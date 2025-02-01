@@ -1,18 +1,19 @@
 import model.Emprestimo;
 import model.ObraLiteraria;
-import model.usuario.Aluno;
-import model.usuario.Bibliotecario;
-import model.usuario.Professor;
-import model.usuario.Usuario;
+import model.usuario.*;
 
 import java.io.*;
+import java.sql.SQLOutput;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class SistemaBiblioteca {
     private ArrayList<Usuario> usuarios;
     private ArrayList<ObraLiteraria> obras;
     private ArrayList<Emprestimo> emprestimos;
     private Usuario usuarioLogado;
+    Scanner input = new Scanner(System.in);
 
     public SistemaBiblioteca() {
         this.usuarios = new ArrayList<>();
@@ -51,6 +52,7 @@ public class SistemaBiblioteca {
     public void carregarDados() {
         usuarios = carregarUsuarios();
         obras = carregarObras();
+        emprestimos = carregarEmprestimos();
     }
 
     public void addUsuario(Usuario usuario) {
@@ -112,9 +114,45 @@ public class SistemaBiblioteca {
         return obras;
     }
 
+    public ArrayList<Emprestimo> carregarEmprestimos() {
+        ArrayList<Emprestimo> emprestimos = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/db_library/emprestimos.csv"))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                String[] dados = linha.split(",");
+                int id = Integer.parseInt(dados[0]);
+                String email = (dados[1]);
+                int idObra = Integer.parseInt(dados[2]);
+                LocalDate dataEmprestimo = LocalDate.parse(dados[3]);
+                LocalDate dataDevolucao = LocalDate.parse(dados[4]);
+                boolean devolvido = Boolean.parseBoolean(dados[5]);
+
+                ObraLiteraria obra = obras.stream()
+                        .filter(o -> o.getId() == idObra)
+                        .findFirst()
+                        .orElse(null);
+
+                UsuarioAcademico usuario = (UsuarioAcademico) usuarios.stream()
+                        .filter(u -> u.getEmail().equals(email))
+                        .findFirst()
+                        .orElse(null);
+
+                if (obra != null && usuario != null) {
+                    Emprestimo emprestimo = new Emprestimo(id, obra, usuario, dataEmprestimo, dataDevolucao, devolvido);
+                    emprestimos.add(emprestimo);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao carregar os empréstimos: " + e.getMessage());
+        }
+        return emprestimos;
+    }
+
+
     public void salvarDados() {
         salvarUsuarios();
         salvarEmprestimos();
+        salvarObras();
     }
 
     private void salvarUsuarios() {
@@ -157,11 +195,12 @@ public class SistemaBiblioteca {
     private void salvarEmprestimos() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/db_library/emprestimos.csv"))) {
             for (Emprestimo emprestimo : emprestimos) {
-                String linha = emprestimo.getId() + ";" +
-                        emprestimo.getUsuario().getEmail() + ";" +
-                        emprestimo.getObra().getId() + ";" +
-                        emprestimo.getDataEmprestimo() + ";" +
-                        emprestimo.getDataDevolucao();
+                String linha = emprestimo.getId() + "," +
+                        emprestimo.getUsuario().getEmail() + "," +
+                        emprestimo.getObra().getId() + "," +
+                        emprestimo.getDataEmprestimo() + "," +
+                        emprestimo.getDataDevolucao() + "," +
+                        emprestimo.isDevolvido();
 
                 writer.write(linha);
                 writer.newLine();
@@ -171,12 +210,21 @@ public class SistemaBiblioteca {
         }
     }
 
-    private void atualizarQuantObra(int id, int alteracaoQuantObra) {
-        obras.stream()
-                .filter(obra -> obra.getId() == id)
-                .findFirst()
-                .ifPresent(obra -> obra.alterarQuantidadeDisponivel(alteracaoQuantObra));
+    public void salvarObras() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/db_library/acervo.csv"))) {
+            for (ObraLiteraria obra : obras) {
+                String linha = obra.getId() + "," +
+                        obra.getTitulo() + "," +
+                        obra.getQuantidadeDisponivel() + "," +
+                        obra.getAutor();
+                writer.write(linha);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao salvar as obras literárias: " + e.getMessage());
+        }
     }
+
 
     public void login(String email, String senha) {
         for (Usuario usuario : usuarios) {
@@ -194,31 +242,58 @@ public class SistemaBiblioteca {
         System.out.println("Logout realizado com sucesso.");
     }
 
-    public void consultarObra(String consulta) {
-        try {
-            int id = Integer.parseInt(consulta);
-            obras.stream()
-                    .filter(obra -> obra.getId() == id)
-                    .findFirst()
-                    .ifPresent(obra -> System.out.println(obra.toString()));
+    public void consultarObra() {
+        String consulta;
+
+        while (true) {
+            System.out.print("Digite o título ou ID da obra: ");
+            consulta = input.nextLine();
+            try {
+                int id = Integer.parseInt(consulta);
+                obras.stream()
+                        .filter(obra -> obra.getId() == id)
+                        .findFirst()
+                        .ifPresent(System.out::println);
 
 
-        } catch (Exception e) {
-            String titulo = consulta;
-            obras.stream()
-                    .filter(obra -> obra.getTitulo().toLowerCase().contains(titulo.toLowerCase()))
-                    .forEach(obra -> {
-                        System.out.println(obra.toString());
-                    });
+            } catch (Exception e) {
+                String titulo = consulta;
+                obras.stream()
+                        .filter(obra -> obra.getTitulo().toLowerCase().contains(titulo.toLowerCase()))
+                        .forEach(System.out::println);
+            }
+            System.out.println("Deseja consultar outro livro? [s/n]");
+
+            if (input.nextLine().toLowerCase().equals("n")) {
+                break;
+            }
         }
+
     }
 
     public void emprestarObra(int idObra) {
-        if (usuarioLogado instanceof Aluno || usuarioLogado instanceof Professor) {
-            // Implementar lógica de empréstimo
-        } else {
-            System.out.println("Usuário não autorizado a realizar empréstimos.");
+        ObraLiteraria obra = obras.stream()
+                .filter(o -> o.getId() == idObra)
+                .findFirst()
+                .get();
+
+        if (obra.getQuantidadeDisponivel() <= 0) {
+            System.out.println("Obra indisponivel. Tente com outra obra.");
+            return;
         }
+
+        Emprestimo emprestimo = new Emprestimo(
+                emprestimos.getLast().getId() + 1, // ID do empréstimo
+                obra, // Obtendo a obra filtrada corretamente
+                (UsuarioAcademico) usuarioLogado, // Cast para UsuarioAcademico
+                LocalDate.now(), // Data do empréstimo
+                LocalDate.now().plusWeeks(2) // Data da devolução
+        );
+
+        emprestimos.add(emprestimo);
+        obra.alterarQuantidadeDisponivel(-1);
+        System.out.println("Emprestimo realizado com sucesso.\n");
+
     }
 
     public void registrarDevolucao(int idEmprestimo) {
@@ -237,9 +312,6 @@ public class SistemaBiblioteca {
         }
     }
 
-    public void cadastrarUsuario(Usuario usuario) {
-        this.usuarios.add(usuario);
-    }
 
 
 }

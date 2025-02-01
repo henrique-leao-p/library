@@ -1,23 +1,34 @@
 package model;
 
 import model.usuario.Usuario;
+import model.usuario.UsuarioAcademico;
+
 import java.time.LocalDate;
 
 public class Emprestimo {
     private int id;
     private ObraLiteraria obra;
-    private Usuario usuario;
+    private UsuarioAcademico usuario;
     private LocalDate dataEmprestimo;
     private LocalDate dataDevolucao;
     private boolean devolvido;
 
-    public Emprestimo(int id, ObraLiteraria obra, Usuario usuario, LocalDate dataEmprestimo, LocalDate dataDevolucao) {
+    public Emprestimo(int id, ObraLiteraria obra, UsuarioAcademico usuario, LocalDate dataEmprestimo, LocalDate dataDevolucao) {
         this.id = id;
         this.obra = obra;
         this.usuario = usuario;
         this.dataEmprestimo = dataEmprestimo;
         this.dataDevolucao = dataDevolucao;
         this.devolvido = false;
+    }
+
+    public Emprestimo(int id, ObraLiteraria obra, UsuarioAcademico usuario, LocalDate dataEmprestimo, LocalDate dataDevolucao, boolean devolvido) {
+        this.id = id;
+        this.obra = obra;
+        this.usuario = usuario;
+        this.dataEmprestimo = dataEmprestimo;
+        this.dataDevolucao = dataDevolucao;
+        this.devolvido = devolvido;
     }
 
     public int getId() {

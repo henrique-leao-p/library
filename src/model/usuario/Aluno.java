@@ -1,15 +1,13 @@
 package model.usuario;
 
-public class Aluno extends Usuario {
+public class Aluno extends UsuarioAcademico {
     private String matricula;
     private String curso;
-    private int limiteEmprestimos;
 
     public Aluno(String nivelAcesso, String nome, String email, String senha, String matricula, String curso) {
-        super(nivelAcesso, nome, email, senha);
+        super(nivelAcesso, nome, email, senha, 2);
         this.matricula = matricula;
         this.curso = curso;
-        this.limiteEmprestimos = 2;
     }
 
     public int getLimiteEmprestimos() {

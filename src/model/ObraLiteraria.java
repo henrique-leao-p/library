@@ -45,6 +45,7 @@ public class ObraLiteraria {
         this.quantidadeDisponivel += alteracao;
     }
 
+
     @Override
     public String toString() {
         String disponivel = (quantidadeDisponivel > 0) ? "Disponível" : "Não Disponível";
