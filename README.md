@@ -1,5 +1,5 @@
 ```mermaid
-erDiagram
+
 ---
 config:
   theme: default
