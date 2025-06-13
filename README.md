@@ -1,3 +1,5 @@
+```mermaid
+erDiagram
 ---
 config:
   theme: default
@@ -31,7 +33,6 @@ erDiagram
         int id_categoria FK "Ref. Categoria"
         int id_grupo_adicional FK "Ref. GrupoAdicional"
     }
-
     Pedido {
         int id PK "ID do Pedido"
         datetime data_hora
@@ -56,6 +57,7 @@ erDiagram
     GrupoAdicional ||--o{ ItemAdicional : "contém"
     Categoria }o--o| Categoria_GrupoAdicional : "vincula-se a"
     GrupoAdicional }o--o| Categoria_GrupoAdicional : "vincula-se a"
+```
 
     Pedido ||--o{ Pedido_Item : "contém"
     Produto ||--o{ Pedido_Item : "é um"
