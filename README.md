@@ -2,7 +2,7 @@
 
 ---
 config:
-  theme: default
+  theme: light
   fontFamily: "Arial, sans-serif"
 ---
 erDiagram
